@@ -1,3 +1,4 @@
+import ParticleSystem from "../systems/ParticleSystem.js";
 import SaveSystem from "../systems/SaveSystem.js";
 import Seasons from "../world/Seasons.js";
 import Generator from "../world/Generator.js";
@@ -56,6 +57,8 @@ export default class GameScene extends Phaser.Scene {
         this.saveSystem = new SaveSystem(this);
         this.saveSystem.load();
 
+        this.particles = new ParticleSystem(this);
+
                     // =========================
 // СОХРАНЕНИЕ (S / L)
 // =========================
@@ -96,6 +99,8 @@ this.input.keyboard.on("keydown-L", () => {
     }
 
     update() {
+            
+        this.particles.update();
         
         this.seasons.update();
         
