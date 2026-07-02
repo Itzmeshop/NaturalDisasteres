@@ -1,3 +1,4 @@
+import Generator from "../world/Generator.js";
 import DisasterManager from "../disasters/DisasterManager.js";
 import WeatherManager from "../weather/WeatherManager.js";
 import Phaser from "phaser";
@@ -40,7 +41,8 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Генерация мира
-        this.generateWorld();
+        this.generator = new Generator(this);
+this.generator.generate();
         this.weather = new WeatherManager(this);
 this.weather.init();
         this.disasters = new DisasterManager(this);
