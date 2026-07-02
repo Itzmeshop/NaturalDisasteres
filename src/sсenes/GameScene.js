@@ -1,3 +1,4 @@
+import DisasterManager from "../disasters/DisasterManager.js";
 import WeatherManager from "../weather/WeatherManager.js";
 import Phaser from "phaser";
 
@@ -42,6 +43,7 @@ export default class GameScene extends Phaser.Scene {
         this.generateWorld();
         this.weather = new WeatherManager(this);
 this.weather.init();
+        this.disasters = new DisasterManager(this);
 
         // Таймер дней
         this.time.addEvent({
@@ -60,6 +62,8 @@ this.weather.init();
     }
 
     update() {
+        
+        this.disasters.update();
         
         this.weather.update();
 
