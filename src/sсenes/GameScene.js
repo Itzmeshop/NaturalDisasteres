@@ -1,3 +1,4 @@
+import EventSystem from "../utils/EventSystem.js";
 import HUD from "../ui/HUD.js";
 import ScoreSystem from "../systems/ScoreSystem.js";
 import AudioSystem from "../systems/AudioSystem.js";
@@ -69,6 +70,8 @@ export default class GameScene extends Phaser.Scene {
 
         this.hud = new HUD(this);
         this.hud.create();
+
+        this.eventsBus = new EventSystem();
 
                     // =========================
 // СОХРАНЕНИЕ (S / L)
