@@ -1,383 +1,92 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Баланс Стихий: Спаси Экосистему</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
 
-        body {
-            background: #11141a;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        #game-container {
-            width: 100%;
-            max-width: 900px;
-            background: #1e222b;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
-            text-align: center;
-            position: relative;
-        }
+<title>Nature Guardian</title>
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #4cd137;
-            text-shadow: 0 0 10px rgba(76, 209, 55, 0.3);
-        }
+<link rel="stylesheet" href="style.css">
 
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            background: #252a34;
-            padding: 12px 20px;
-            border-radius: 10px;
-        }
-
-        .stat-box {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        #energy-count { color: #fbc531; }
-        #score-count { color: #00a8ff; }
-
-        .progress-container {
-            width: 100%;
-            background-color: #4a5568;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            position: relative;
-            height: 25px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 100%;
-            background-color: #4cd137;
-            transition: width 0.3s ease, background-color 0.5s ease;
-        }
-
-        .progress-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            top: 3px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 3px #000;
-        }
-
-        /* Контейнер для 3D холста */
-        #canvas-container {
-            width: 100%;
-            height: 400px;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-            border: 4px solid #252a34;
-        }
-
-        #disaster-alert {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 36px;
-            font-weight: bold;
-            color: #e84118;
-            text-shadow: 0 0 15px rgba(232, 65, 24, 0.8), 2px 2px 4px #000;
-            display: none;
-            animation: pulse 1s infinite;
-            z-index: 10;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .btn {
-            background: #252a34;
-            color: white;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
-        .btn:hover:not(:disabled) { background: #343b4d; transform: translateY(-2px); }
-        .btn:active:not(:disabled) { transform: translateY(1px); }
-        .btn:disabled {
-            background: #1a1d24;
-            color: #555;
-            cursor: not-allowed;
-            opacity: 0.5;
-            box-shadow: none;
-        }
-
-        #btn-water { border-bottom: 4px solid #00a8ff; }
-        #btn-fire { border-bottom: 4px solid #e84118; }
-        #btn-plant { border-bottom: 4px solid #4cd137; }
-
-        #game-over-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 12, 16, 0.95);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            display: none;
-        }
-
-        #game-over-screen h2 {
-            font-size: 44px;
-            color: #e84118;
-            margin-bottom: 15px;
-            text-shadow: 0 0 20px rgba(232,65,24,0.4);
-        }
-
-        #restart-btn {
-            background: #4cd137;
-            color: white;
-            padding: 16px 36px;
-            font-size: 20px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            margin-top: 25px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        #restart-btn:hover { background: #44bd32; }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
+
 <body>
 
-<div id="game-container">
-    <h1>3D Симулятор Экосистемы</h1>
+<div id="loading">
 
-    <div class="stats">
-        <div class="stat-box">Энергия: <span id="energy-count">60</span> ⚡</div>
-        <div class="stat-box">Дней прожито: <span id="score-count">0</span> 📅</div>
-    </div>
+<h1>🌳 Nature Guardian</h1>
 
-    <div class="progress-container">
-        <div id="eco-health-bar" class="progress-bar"></div>
-        <div class="progress-text">Здоровье Экосистемы: <span id="health-text">100</span>%</div>
-    </div>
+<p>Загрузка мира...</p>
 
-    <div id="canvas-container">
-        <div id="disaster-alert">ПОЖАР!</div>
-    </div>
-
-    <div class="actions">
-        <button id="btn-water" class="btn" onclick="applyAction('water')">Вызвать Дождь (15 ⚡)</button>
-        <button id="btn-fire" class="btn" onclick="applyAction('fire')">Тушить Пожар (20 ⚡)</button>
-        <button id="btn-plant" class="btn" onclick="applyAction('plant')">Посадить Лес (10 ⚡)</button>
-    </div>
-
-    <div id="game-over-screen">
-        <h2>Экосистема разрушена!</h2>
-        <p style="font-size: 22px;">Вы удерживали баланс природы <span id="final-score">0</span> дней.</p>
-        <button id="restart-btn" onclick="startGame()">Начать заново</button>
-    </div>
 </div>
 
-<script>
-    // Игровое состояние
-    let health = 100;
-    let energy = 60;
-    let score = 0;
-    let currentDisaster = null;
-    let gameInterval, disasterInterval, energyInterval;
+<div id="game">
 
-    // Ссылки на DOM
-    const healthBar = document.getElementById('eco-health-bar');
-    const healthText = document.getElementById('health-text');
-    const energyCount = document.getElementById('energy-count');
-    const scoreCount = document.getElementById('score-count');
-    const disasterAlert = document.getElementById('disaster-alert');
-    const gameOverScreen = document.getElementById('game-over-screen');
-    const finalScore = document.getElementById('final-score');
-    const canvasContainer = document.getElementById('canvas-container');
+<canvas id="canvas"></canvas>
 
-    // Параметры катастроф
-    const disasters = {
-        fire: { name: 'ПОЖАР! 🔥', damage: 6, lightColor: 0xff3300, bgColor: 0x3d1d1d },
-        drought: { name: 'ЗАСУХА! ☀️', damage: 4, lightColor: 0xffaa00, bgColor: 0x4a3f2c },
-        flood: { name: 'НАВОДНЕНИЕ! 🌊', damage: 5, lightColor: 0x0055ff, bgColor: 0x1d2e3d }
-    };
+<div id="ui">
 
-    // Трёхмерные переменные Three.js
-    let scene, camera, renderer, island, ambientLight, dirLight;
-    let treesGroup = [];
+<div id="topBar">
 
-    // Инициализация 3D сцены (вызывается один раз)
-    function init3D() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x74b9ff);
+<div>
+❤️ Здоровье природы
+<span id="nature">100%</span>
+</div>
 
-        camera = new THREE.PerspectiveCamera(45, canvasContainer.clientWidth / canvasContainer.clientHeight, 0.1, 1000);
-        camera.position.set(0, 12, 18);
-        camera.lookAt(0, 1, 0);
+<div>
+💰 Очки
+<span id="money">0</span>
+</div>
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-        renderer.shadowMap.enabled = true;
-        canvasContainer.appendChild(renderer.domElement);
+<div>
+📅 День
+<span id="day">1</span>
+</div>
 
-        // Освещение
-        ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
+</div>
 
-        dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 10);
-        dirLight.castShadow = true;
-        scene.add(dirLight);
+<div id="menu">
 
-        // Создаем землю (остров)
-        const islandGeo = new THREE.CylinderGeometry(6, 6.5, 2, 32);
-        const islandMat = new THREE.MeshStandardMaterial({ color: 0x55efc4, roughness: 0.8 });
-        island = new THREE.Mesh(islandGeo, islandMat);
-        island.position.y = -1;
-        island.receiveShadow = true;
-        scene.add(island);
+<button id="plantTree">
+🌳 Посадить дерево
+</button>
 
-        // Анимационный цикл рендеринга
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Медленное вращение острова для динамики
-            if (island) island.rotation.y += 0.002;
-            
-            // Эффект тряски деревьев при катастрофах
-            if (currentDisaster) {
-                const time = Date.now() * 0.02;
-                treesGroup.forEach(tree => {
-                    tree.rotation.z = Math.sin(time + tree.position.x) * 0.08;
-                    tree.rotation.x = Math.cos(time + tree.position.z) * 0.08;
-                });
-            }
+<button id="cleanRiver">
+💧 Очистить реку
+</button>
 
-            renderer.render(scene, camera);
-        }
-        animate();
-    }
+<button id="saveAnimals">
+🦌 Спасти животных
+</button>
 
-    // Старт и перезапуск игры
-    function startGame() {
-        clearInterval(gameInterval);
-        clearInterval(disasterInterval);
-        clearInterval(energyInterval);
+<button id="weather">
+🌧 Вызвать дождь
+</button>
 
-        health = 100;
-        energy = 60;
-        score = 0;
-        
-        gameOverScreen.style.display = 'none';
-        stopDisaster();
+</div>
 
-        // Очищаем старые деревья
-        treesGroup.forEach(tree => island.remove(tree));
-        treesGroup = [];
+<div id="events">
 
-        // Генерируем стартовый лес
-        for (let i = 0; i < 10; i++) {
-            addTree3D();
-        }
+<h2>События</h2>
 
-        updateUI();
+<ul id="eventList">
 
-        // Игровые таймеры
-        gameInterval = setInterval(gameTick, 1000);
-        disasterInterval = setInterval(randomDisasterEvent, 6000);
-        energyInterval = setInterval(() => {
-            if (energy < 100) {
-                energy = Math.min(100, energy + 6);
-                updateUI();
-            }
-        }, 1000);
-    }
+</ul>
 
-    // Создание 3D дерева
-    function addTree3D() {
-        if (treesGroup.length > 30) {
-            island.remove(treesGroup[0]);
-            treesGroup.shift();
-        }
+</div>
 
-        const tree = new THREE.Group();
+</div>
 
-        // Ствол
-        const trunkGeo = new THREE.CylinderGeometry(0.15, 0.25, 1, 8);
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
-        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-        trunk.position.y = 0.5;
-        trunk.castShadow = true;
-        tree.add(trunk);
+</div>
 
-        // Листва (Конус)
-        const leavesGeo = new THREE.ConeGeometry(0.8, 1.8, 8);
-        const leavesMat = new THREE.MeshStandardMaterial({ 
-            color: Math.random() > 0.5 ? 0x2ecc71 : 0x27ae60, 
-            roughness: 0.6 
-        });
-        const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-        leaves.position.y = 1.6;
-        leaves.castShadow = true;
-        tree.add(leaves);
+<script src="js/game.js"></script>
+<script src="js/world.js"></script>
+<script src="js/player.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/disasters.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/save.js"></script>
 
-        // Случайная позиция на круглом острове
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 4.8; // Чуть меньше радиуса острова
-        tree.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-        
-        // Случайный размер
-        const scale = 0.7 + Math.random() * 0.6;
-        tree.scale.set(scale, scale, scale);
-
-        island.add(tree);
-        treesGroup.push(tree);
-    }
-
-    function gameTick() {
-        score++;
-        if (currentDisaster) {
-            health -= disasters[currentDisaster].damage;
-        } else {
-            if (health < 100) health =
+</body>
+</html>
