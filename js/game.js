@@ -100,7 +100,8 @@ class Animal{
         if(this.x<0||this.x>canvas.width) this.vx*=-1;
 
         if(this.y<0||this.y>canvas.height) this.vy*=-1;
-
+        
+        updateWeather();
     }
 
     draw(){
@@ -224,6 +225,8 @@ function update(){
 
     }
 
+      updateWeather();
+    
 }
 
 function draw(){
@@ -247,7 +250,9 @@ function draw(){
         animal.draw();
 
     }
-
+    
+    drawWeather();
+    
 }
 
 function ui(){
