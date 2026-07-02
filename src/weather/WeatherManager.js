@@ -59,6 +59,8 @@ export default class WeatherManager {
     }
 
     changeWeather(type) {
+        
+        this.scene.audio?.playWeather(type);
 
         this.current = type;
 
