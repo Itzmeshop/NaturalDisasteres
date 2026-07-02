@@ -1,3 +1,4 @@
+import WeatherManager from "../weather/WeatherManager.js";
 import Phaser from "phaser";
 
 export default class GameScene extends Phaser.Scene {
