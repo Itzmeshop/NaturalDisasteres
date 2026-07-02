@@ -251,5 +251,25 @@ this.input.keyboard.on("keydown-L", () => {
         this.dayText.setText(
             "📅 День: " + this.day
         );
+    }    
+    
+     updateTrees() {
+
+    for (let i = this.trees.length - 1; i >= 0; i--) {
+
+        const tree = this.trees[i];
+
+        // рост
+        if (tree.health > 60) {
+            tree.scaleX = Math.min(tree.scaleX + 0.0005, 1.5);
+            tree.scaleY = tree.scaleX;
+        }
+
+        // умирает
+        if (tree.health <= 0) {
+
+            tree.destroy();
+            this.trees.splice(i, 1);
+        }
     }
 }
