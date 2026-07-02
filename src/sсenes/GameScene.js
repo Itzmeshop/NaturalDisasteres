@@ -1,3 +1,4 @@
+import ScoreSystem from "../systems/ScoreSystem.js";
 import AudioSystem from "../systems/AudioSystem.js";
 import ParticleSystem from "../systems/ParticleSystem.js";
 import SaveSystem from "../systems/SaveSystem.js";
@@ -63,6 +64,8 @@ export default class GameScene extends Phaser.Scene {
         this.audio = new AudioSystem(this);
         this.audio.init();
 
+        this.scoreSystem = new ScoreSystem(this);
+
                     // =========================
 // СОХРАНЕНИЕ (S / L)
 // =========================
@@ -103,6 +106,8 @@ this.input.keyboard.on("keydown-L", () => {
     }
 
     update() {
+        
+        this.scoreSystem.update();
             
         this.particles.update();
         
@@ -155,6 +160,8 @@ this.input.keyboard.on("keydown-L", () => {
         this.trees.push(tree);
 
         this.natureHealth += 0.5;
+
+        this.scoreSystem.onTreePlanted();
     }
 
     spawnAnimal() {
