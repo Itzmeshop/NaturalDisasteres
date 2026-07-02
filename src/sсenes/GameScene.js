@@ -113,6 +113,8 @@ this.input.keyboard.on("keydown-L", () => {
     }
 
     update() {
+
+        this.updateTrees();
         
         this.hud.update();
         
@@ -272,4 +274,14 @@ this.input.keyboard.on("keydown-L", () => {
             this.trees.splice(i, 1);
         }
     }
+         
+         this.add.text(
+    20,
+    this.cameras.main.height - 30,
+    "ЛКМ — посадить дерево | S — сохранить | L — загрузить",
+    {
+        fontSize: "14px",
+        color: "#ffffff"
+       }
+   );
 }
