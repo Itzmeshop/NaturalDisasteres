@@ -1,3 +1,4 @@
+import AudioSystem from "../systems/AudioSystem.js";
 import ParticleSystem from "../systems/ParticleSystem.js";
 import SaveSystem from "../systems/SaveSystem.js";
 import Seasons from "../world/Seasons.js";
@@ -58,6 +59,9 @@ export default class GameScene extends Phaser.Scene {
         this.saveSystem.load();
 
         this.particles = new ParticleSystem(this);
+
+        this.audio = new AudioSystem(this);
+        this.audio.init();
 
                     // =========================
 // СОХРАНЕНИЕ (S / L)
