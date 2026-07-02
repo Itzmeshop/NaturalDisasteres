@@ -1,3 +1,4 @@
+import HUD from "../ui/HUD.js";
 import ScoreSystem from "../systems/ScoreSystem.js";
 import AudioSystem from "../systems/AudioSystem.js";
 import ParticleSystem from "../systems/ParticleSystem.js";
@@ -66,6 +67,9 @@ export default class GameScene extends Phaser.Scene {
 
         this.scoreSystem = new ScoreSystem(this);
 
+        this.hud = new HUD(this);
+        this.hud.create();
+
                     // =========================
 // СОХРАНЕНИЕ (S / L)
 // =========================
@@ -106,6 +110,8 @@ this.input.keyboard.on("keydown-L", () => {
     }
 
     update() {
+        
+        this.hud.update();
         
         this.scoreSystem.update();
             
