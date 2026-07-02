@@ -44,13 +44,29 @@ export default class GameScene extends Phaser.Scene {
 
         // Генерация мира
         this.generator = new Generator(this);
-this.generator.generate();
+        this.generator.generate();
+        
         this.weather = new WeatherManager(this);
-this.weather.init();
+        this.weather.init();
+        
         this.disasters = new DisasterManager(this);
+        
         this.seasons = new Seasons(this);
+        
         this.saveSystem = new SaveSystem(this);
-this.saveSystem.load();
+        this.saveSystem.load();
+
+                    // =========================
+// СОХРАНЕНИЕ (S / L)
+// =========================
+
+this.input.keyboard.on("keydown-S", () => {
+    this.saveSystem.save();
+});
+
+this.input.keyboard.on("keydown-L", () => {
+    this.saveSystem.load();
+});
 
         // Таймер дней
         this.time.addEvent({
