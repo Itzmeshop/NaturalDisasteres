@@ -102,6 +102,7 @@ class Animal{
         if(this.y<0||this.y>canvas.height) this.vy*=-1;
         
         updateWeather();
+        
     }
 
     draw(){
@@ -226,6 +227,8 @@ function update(){
     }
 
       updateWeather();
+
+    updateDisasters();
     
 }
 
@@ -252,6 +255,8 @@ function draw(){
     }
     
     drawWeather();
+
+    drawDisasters();
     
 }
 
@@ -339,6 +344,22 @@ document.getElementById("weather").onclick=()=>{
     if(typeof startRain==="function"){
 
         startRain();
+
+    }
+
+    function addEvent(text){
+
+    const list=document.getElementById("eventList");
+
+    const li=document.createElement("li");
+
+    li.textContent=text;
+
+    list.prepend(li);
+
+    while(list.children.length>8){
+
+        list.removeChild(list.lastChild);
 
     }
 
