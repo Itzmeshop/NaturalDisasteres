@@ -70,6 +70,8 @@ export default class DisasterManager {
         );
 
         this.active.push(fire);
+
+        this.scene.audio?.playFire();
     }
 
     // =========================
