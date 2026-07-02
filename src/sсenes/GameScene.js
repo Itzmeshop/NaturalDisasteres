@@ -40,6 +40,8 @@ export default class GameScene extends Phaser.Scene {
 
         // Генерация мира
         this.generateWorld();
+        this.weather = new WeatherManager(this);
+this.weather.init();
 
         // Таймер дней
         this.time.addEvent({
