@@ -24,6 +24,18 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
 
+        
+
+    this.input.keyboard.on("keydown-S", () => {
+        this.saveSystem.save();
+    });
+
+    this.input.keyboard.on("keydown-L", () => {
+        this.saveSystem.load();
+    });
+
+}
+
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
@@ -72,6 +84,8 @@ export default class GameScene extends Phaser.Scene {
         this.hud.create();
 
         this.eventsBus = new EventSystem();
+
+        this.generateWorld();
 
                     // =========================
 // СОХРАНЕНИЕ (S / L)
@@ -253,29 +267,7 @@ this.input.keyboard.on("keydown-L", () => {
         this.dayText.setText(
             "📅 День: " + this.day
         );
-    }    
-    
-     updateTrees() {
-
-    for (let i = this.trees.length - 1; i >= 0; i--) {
-
-        const tree = this.trees[i];
-
-        // рост
-        if (tree.health > 60) {
-            tree.scaleX = Math.min(tree.scaleX + 0.0005, 1.5);
-            tree.scaleY = tree.scaleX;
-        }
-
-        // умирает
-        if (tree.health <= 0) {
-
-            tree.destroy();
-            this.trees.splice(i, 1);
-        }
-    }
-         
-         this.add.text(
+    }              
     20,
     this.cameras.main.height - 30,
     "ЛКМ — посадить дерево | S — сохранить | L — загрузить",
