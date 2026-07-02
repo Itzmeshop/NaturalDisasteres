@@ -1,1 +1,176 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
 
+body{
+    overflow:hidden;
+    background:#0b1720;
+    color:white;
+}
+
+#loading{
+    position:absolute;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:#0b1720;
+    z-index:100;
+}
+
+#loading h1{
+    font-size:48px;
+    margin-bottom:20px;
+}
+
+#loading p{
+    color:#8fd694;
+}
+
+#game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+}
+
+canvas{
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:linear-gradient(#67b7ff,#8fd694);
+}
+
+#ui{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+
+#topBar{
+    position:absolute;
+    top:15px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:20px;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(6px);
+    padding:12px 18px;
+    border-radius:12px;
+    pointer-events:auto;
+}
+
+#topBar div{
+    min-width:140px;
+    text-align:center;
+    font-weight:bold;
+}
+
+#menu{
+    position:absolute;
+    left:20px;
+    top:90px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    pointer-events:auto;
+}
+
+#menu button{
+    border:none;
+    border-radius:10px;
+    padding:14px;
+    background:#2e8b57;
+    color:white;
+    cursor:pointer;
+    transition:.2s;
+    font-size:16px;
+}
+
+#menu button:hover{
+    background:#37a866;
+    transform:translateX(4px);
+}
+
+#events{
+    position:absolute;
+    right:20px;
+    top:90px;
+    width:280px;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(6px);
+    border-radius:12px;
+    padding:15px;
+    pointer-events:auto;
+}
+
+#events h2{
+    margin-bottom:10px;
+    text-align:center;
+}
+
+#eventList{
+    list-style:none;
+    max-height:350px;
+    overflow-y:auto;
+}
+
+#eventList li{
+    margin-bottom:8px;
+    padding:8px;
+    border-radius:8px;
+    background:rgba(255,255,255,.08);
+    animation:fade .3s;
+}
+
+@keyframes fade{
+    from{
+        opacity:0;
+        transform:translateY(-8px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@media(max-width:900px){
+
+#topBar{
+    width:95%;
+    gap:8px;
+    font-size:14px;
+}
+
+#topBar div{
+    min-width:80px;
+}
+
+#menu{
+    bottom:20px;
+    top:auto;
+    left:50%;
+    transform:translateX(-50%);
+    flex-direction:row;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+#menu button{
+    width:160px;
+}
+
+#events{
+    width:95%;
+    left:50%;
+    transform:translateX(-50%);
+    top:80px;
+}
+}
