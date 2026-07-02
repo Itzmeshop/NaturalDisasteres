@@ -60,6 +60,8 @@ this.weather.init();
     }
 
     update() {
+        
+        this.weather.update();
 
         this.updateAnimals();
 
