@@ -1,3 +1,4 @@
+import Seasons from "../world/Seasons.js";
 import Generator from "../world/Generator.js";
 import DisasterManager from "../disasters/DisasterManager.js";
 import WeatherManager from "../weather/WeatherManager.js";
@@ -46,6 +47,7 @@ this.generator.generate();
         this.weather = new WeatherManager(this);
 this.weather.init();
         this.disasters = new DisasterManager(this);
+        this.seasons = new Seasons(this);
 
         // Таймер дней
         this.time.addEvent({
@@ -64,6 +66,8 @@ this.weather.init();
     }
 
     update() {
+        
+        this.seasons.update();
         
         this.disasters.update();
         
