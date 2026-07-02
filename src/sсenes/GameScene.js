@@ -1,3 +1,4 @@
+import SaveSystem from "../systems/SaveSystem.js";
 import Seasons from "../world/Seasons.js";
 import Generator from "../world/Generator.js";
 import DisasterManager from "../disasters/DisasterManager.js";
@@ -48,6 +49,8 @@ this.generator.generate();
 this.weather.init();
         this.disasters = new DisasterManager(this);
         this.seasons = new Seasons(this);
+        this.saveSystem = new SaveSystem(this);
+this.saveSystem.load();
 
         // Таймер дней
         this.time.addEvent({
@@ -62,6 +65,17 @@ this.weather.init();
         // Клик = посадить дерево
         this.input.on("pointerdown", (pointer) => {
             this.plantTree(pointer.x, pointer.y);
+
+            // =========================
+// СОХРАНЕНИЕ (S / L)
+// =========================
+
+this.input.keyboard.on("keydown-S", () => {
+    this.saveSystem.save();
+});
+
+this.input.keyboard.on("keydown-L", () => {
+    this.saveSystem.load();
         });
     }
 
