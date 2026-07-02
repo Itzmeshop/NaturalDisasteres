@@ -1,1 +1,345 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Последний Егерь: Битва со Стихией</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; }
+        body { background: #11141a; color: #e1e7ed; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Панель состояния */
+        .hud { background: #1a1f29; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b4856; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .stats { display: flex; gap: 15px; font-size: 14px; font-weight: bold; }
+        .stat-val { color: #00ffcc; }
+        .wind-indicator { background: #242c37; padding: 5px 10px; border-radius: 6px; font-size: 13px; display: flex; align-items: center; gap: 5px; border: 1px solid #3b4856; }
+        #wind-arrow { display: inline-block; font-size: 16px; color: #ff9900; font-weight: bold; transition: transform 0.3s ease; }
 
+        /* Игровое поле */
+        .game-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 10px; overflow: auto; background: #0d0f13; }
+        .grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; background: #1a1f29; padding: 4px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Клетки */
+        .cell { width: 35px; height: 35px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all 0.2s; position: relative; }
+        @media (min-width: 600px) { .cell { width: 50px; height: 50px; font-size: 24px; } }
+        
+        /* Типы биомов */
+        .grass { background: #2e7d32; } /* Трава */
+        .tree { background: #1b5e20; }  /* Густой лес */
+        .water { background: #0288d1; } /* Река */
+        .trench { background: #5d4037; }/* Просека/Земля */
+        
+        /* Состояния огня */
+        .fire { background: #d84315 !important; animation: burn 0.5s infinite alternate; }
+        .fire::after { content: '🔥'; position: absolute; }
+        .ash { background: #37474f !important; } /* Сгорело */
+
+        @keyframes burn { 
+            0% { box-shadow: inset 0 0 5px #ff1100; transform: scale(0.98); } 
+            100% { box-shadow: inset 0 0 12px #ffcc00; transform: scale(1); } 
+        }
+
+        /* Инструменты управления */
+        .controls { background: #1a1f29; padding: 15px; border-top: 2px solid #3b4856; display: flex; flex-direction: column; gap: 10px; }
+        .actions-row { display: flex; gap: 10px; justify-content: center; }
+        .btn { flex: 1; max-width: 150px; background: #242c37; border: 1px solid #455365; color: #fff; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; text-align: center; }
+        .btn.active { background: #00ffcc; color: #0d0f13; border-color: #00ffcc; }
+        .btn-end { background: #e65100; border-color: #ff6d00; color: white; }
+
+        /* Окна уведомлений */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13,15,19,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .modal h2 { font-size: 28px; margin-bottom: 15px; color: #00ffcc; }
+        .modal p { font-size: 15px; margin-bottom: 25px; color: #a4b0be; max-width: 400px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="hud">
+        <div class="stats">
+            <div>ОД: <span id="ap-val" class="stat-val">3/3</span></div>
+            <div>Спасено: <span id="saved-val" class="stat-val">0/3</span></div>
+            <div>Ход: <span id="turn-val" class="stat-val">1</span></div>
+        </div>
+        <div class="wind-indicator">
+            <span>Ветер:</span>
+            <span id="wind-arrow">↑</span>
+            <span id="wind-txt">СЕВЕР</span>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="grid" id="map-grid"></div>
+    </div>
+
+    <div class="controls">
+        <p style="text-align: center; font-size: 12px; color: #8899a6;">Выберите режим, затем нажмите на соседнюю клетку:</p>
+        <div class="actions-row">
+            <button class="btn active" id="mode-move" onclick="setMode('move')">🚶 Шаг (1 ОД)</button>
+            <button class="btn" id="mode-water" onclick="setMode('water')">💧 Тушить (1 ОД)</button>
+            <button class="btn" id="mode-dig" onclick="setMode('dig')">⛏️ Просека (2 ОД)</button>
+        </div>
+        <div class="actions-row">
+            <button class="btn btn-end" style="max-width: 310px;" onclick="endTurn()">🔥 КОНЕЦ ХОДА (Распространение огня)</button>
+        </div>
+    </div>
+
+    <div id="game-modal" class="modal">
+        <h2 id="modal-title">ПОБЕДА</h2>
+        <p id="modal-desc"></p>
+        <button class="btn" style="background:#00ffcc; color:#000;" onclick="location.reload()">Играть снова</button>
+    </div>
+
+    <script>
+        const GRID_SIZE = 10;
+        let mapData = [];
+        let player = { x: 0, y: 9 }; // Старт в левом нижнем углу
+        let currentMode = 'move'; // move, water, dig
+        let actionsPoints = 3;
+        let maxActionPoints = 3;
+        let turnCounter = 1;
+        let savedAnimals = 0;
+        const totalAnimals = 3;
+
+        // Ветровые направления: x-модификатор, y-модификатор, стрелка, название
+        const winds = [
+            { dx: 0, dy: -1, arrow: '↑', name: 'СЕВЕР' },
+            { dx: 1, dy: 0, arrow: '→', name: 'ВОСТОК' },
+            { dx: 0, dy: 1, arrow: '↓', name: 'ЮГ' },
+            { dx: -1, dy: 0, arrow: '←', name: 'ЗАПАД' }
+        ];
+        let currentWindIndex = 0; // Начинаем с Севера
+
+        // Инициализация карты
+        function initGame() {
+            mapData = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                mapData[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    // Генерация ландшафта
+                    let type = 'grass';
+                    if (Math.random() < 0.25) type = 'tree'; // Лес горит сильнее
+                    if ((x === 4 || x === 5) && y < 7) type = 'water'; // Вертикальная река-преграда
+                    
+                    mapData[y][x] = {
+                        type: type,
+                        isFire: false,
+                        isAsh: false,
+                        hasAnimal: false,
+                        hasExit: false
+                    };
+                }
+            }
+
+            // Очаги возгорания на старте (в правом верхнем углу)
+            mapData[0][8].isFire = true;
+            mapData[1][9].isFire = true;
+            mapData[2][7].isFire = true;
+
+            // Вертолетная площадка (Точка спасения в левом верхнем углу)
+            mapData[0][0].hasExit = true;
+            mapData[0][0].type = 'trench'; // Расчищенная зона
+
+            // Разбрасываем 3 животных по карте
+            let placed = 0;
+            while(placed < totalAnimals) {
+                let rx = Math.floor(Math.random() * 6) + 3;
+                let ry = Math.floor(Math.random() * 6) + 2;
+                if (!mapData[ry][rx].isFire && mapData[ry][rx].type !== 'water' && !mapData[ry][rx].hasExit) {
+                    mapData[ry][rx].hasAnimal = true;
+                    placed++;
+                }
+            }
+
+            updateWindUI();
+            renderMap();
+        }
+
+        function renderMap() {
+            const gridEl = document.getElementById('map-grid');
+            gridEl.innerHTML = '';
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const tile = mapData[y][x];
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${tile.type}`;
+                    
+                    if (tile.isFire) cell.classList.add('fire');
+                    if (tile.isAsh) cell.classList.add('ash');
+
+                    // Отрисовка контента внутри клетки
+                    if (x === player.x && y === player.y) {
+                        cell.innerText = '🤠'; // Егерь
+                    } else if (tile.hasExit) {
+                        cell.innerText = '🛸'; // Вертолет
+                    } else if (tile.hasAnimal && !tile.isFire && !tile.isAsh) {
+                        cell.innerText = '🦊'; // Животное
+                    }
+
+                    cell.onclick = () => handleCellClick(x, y);
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.controls .btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`mode-${mode}`).classList.add('active');
+        }
+
+        function handleCellClick(x, y) {
+            // Проверяем, что кликнули на соседнюю клетку
+            const dx = Math.abs(x - player.x);
+            const dy = Math.abs(y - player.y);
+            
+            if ((dx + dy !== 1) && currentMode !== 'none') {
+                return; // Взаимодействие только по кресту (соседи)
+            }
+
+            const target = mapData[y][x];
+
+            if (currentMode === 'move') {
+                if (target.type === 'water') { alert("Реку нельзя перейти вброд здесь!"); return; }
+                if (target.isFire) { alert("Нельзя шагать прямо в огонь!"); return; }
+                if (actionsPoints >= 1) {
+                    player.x = x; player.y = y;
+                    actionsPoints -= 1;
+                    // Проверка сбора животного
+                    if (target.hasAnimal) {
+                        target.hasAnimal = false;
+                        savedAnimals++;
+                        document.getElementById('saved-val').innerText = `${savedAnimals}/${totalAnimals}`;
+                    }
+                    // Проверка победы
+                    if (target.hasExit) {
+                        if (savedAnimals < totalAnimals) {
+                            alert("Вы не можете улететь без спасенных животных!");
+                        } else {
+                            showEndGame(true, "Вы доставили всех животных к спасательному вертолету! Лес пострадал, но экосистема спасена. Отличная тактическая работа!");
+                        }
+                    }
+                }
+            } 
+            else if (currentMode === 'water') {
+                if (!target.isFire) return;
+                if (actionsPoints >= 1) {
+                    target.isFire = false;
+                    actionsPoints -= 1;
+                }
+            } 
+            else if (currentMode === 'dig') {
+                if (target.type === 'water' || target.isFire || target.isAsh || target.hasExit) return;
+                if (actionsPoints >= 2) {
+                    target.type = 'trench'; // Просека
+                    actionsPoints -= 2;
+                } else {
+                    alert("Недостаточно Очков Действий (Нужно 2 ОД)!");
+                }
+            }
+
+            document.getElementById('ap-val').innerText = `${actionsPoints}/${maxActionPoints}`;
+            renderMap();
+        }
+
+        // КОНЕЦ ХОДА: Распространение пожара
+        function endTurn() {
+            let nextFireMap = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                nextFireMap[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    nextFireMap[y][x] = mapData[y][x].isFire;
+                }
+            }
+
+            const wind = winds[currentWindIndex];
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (mapData[y][x].isFire) {
+                        // Массив соседей, куда огонь идет в обычном режиме
+                        const neighbors = [
+                            {nx: x+1, ny: y}, {nx: x-1, ny: y},
+                            {nx: x, ny: y+1}, {nx: x, ny: y-1}
+                        ];
+
+                        // Дополнительный вектор удара огня из-за ВЕТРА
+                        neighbors.push({nx: x + wind.dx, ny: y + wind.dy});
+                        neighbors.push({nx: x + wind.dx * 2, ny: y + wind.dy * 2}); // Сильный порыв ветра
+
+                        neighbors.forEach(n => {
+                            if (n.nx >= 0 && n.nx < GRID_SIZE && n.ny >= 0 && n.ny < GRID_SIZE) {
+                                const t = mapData[n.ny][n.nx];
+                                if (t.type !== 'water' && t.type !== 'trench' && !t.isAsh) {
+                                    // Шанс поджога (зависит от типа)
+                                    let burnChance = t.type === 'tree' ? 0.8 : 0.5;
+                                    if (Math.random() < burnChance) {
+                                        nextFireMap[n.ny][n.nx] = true;
+                                    }
+                                }
+                            }
+                        });
+
+                        // Текущая горящая клетка постепенно выгорает до пепла
+                        if (Math.random() < 0.4) {
+                            mapData[y][x].isFire = false;
+                            mapData[y][x].isAsh = true;
+                            nextFireMap[y][x] = false;
+                        }
+                    }
+                }
+            }
+
+            // Переносим данные пожара назад
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    mapData[y][x].isFire = nextFireMap[y][x];
+                }
+            }
+
+            // Проверка поражения (если огонь сжег вертолет или игрока)
+            if (mapData[player.y][player.x].isFire || mapData[0][0].isFire) {
+                showEndGame(false, "Огонь окружил вас или уничтожил эвакуационный вертолет. Стихия оказалась сильнее. Попробуйте спланировать маршрут лучше!");
+                return;
+            }
+
+            // Смена ветра каждые 4 хода
+            turnCounter++;
+            if (turnCounter % 4 === 0) {
+                currentWindIndex = (currentWindIndex + 1) % winds.length;
+                updateWindUI();
+            }
+
+            // Восстановление ОД
+            actionsPoints = maxActionPoints;
+            document.getElementById('ap-val').innerText = `${actionsPoints}/${maxActionPoints}`;
+            document.getElementById('turn-val').innerText = turnCounter;
+
+            renderMap();
+        }
+
+        function updateWindUI() {
+            const w = winds[currentWindIndex];
+            document.getElementById('wind-arrow').innerText = w.arrow;
+            document.getElementById('wind-txt').innerText = w.name;
+            
+            // Поворачиваем стрелку для красоты
+            let rot = 0;
+            if (w.name === 'ВОСТОК') rot = 90;
+            if (w.name === 'ЮГ') rot = 180;
+            if (w.name === 'ЗАПАД') rot = 270;
+            document.getElementById('wind-arrow').style.transform = `rotate(${rot}deg)`;
+        }
+
+        function showEndGame(isWin, text) {
+            const modal = document.getElementById('game-modal');
+            document.getElementById('modal-title').innerText = isWin ? "🏆 ПОБЕДА ОДЕРЖАНА!" : "🔥 ЛЕС СГОРЕЛ";
+            document.getElementById('modal-title').style.color = isWin ? "#00ffcc" : "#ff3333";
+            document.getElementById('modal-desc').innerText = text;
+            modal.style.display = 'flex';
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
