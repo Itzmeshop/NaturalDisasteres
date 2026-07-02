@@ -24,22 +24,10 @@ export default class GameScene extends Phaser.Scene {
 
     create() {
 
-        
-
-    this.input.keyboard.on("keydown-S", () => {
-        this.saveSystem.save();
-    });
-
-    this.input.keyboard.on("keydown-L", () => {
-        this.saveSystem.load();
-    });
-
-}
-
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
-        // Фон мира
+        // фон
         this.add.rectangle(
             width / 2,
             height / 2,
@@ -48,7 +36,7 @@ export default class GameScene extends Phaser.Scene {
             0x2e8b57
         );
 
-        // Заголовок UI
+        // UI
         this.healthText = this.add.text(20, 20, "", {
             fontSize: "18px",
             color: "#ffffff"
@@ -59,17 +47,27 @@ export default class GameScene extends Phaser.Scene {
             color: "#ffffff"
         });
 
-        // Генерация мира
+        this.controlsText = this.add.text(
+            20,
+            height - 30,
+            "ЛКМ — посадить дерево | S — сохранить | L — загрузить",
+            {
+                fontSize: "14px",
+                color: "#ffffff"
+            }
+        );
+
+        // системы
         this.generator = new Generator(this);
         this.generator.generate();
-        
+
         this.weather = new WeatherManager(this);
         this.weather.init();
-        
+
         this.disasters = new DisasterManager(this);
-        
+
         this.seasons = new Seasons(this);
-        
+
         this.saveSystem = new SaveSystem(this);
         this.saveSystem.load();
 
@@ -85,21 +83,19 @@ export default class GameScene extends Phaser.Scene {
 
         this.eventsBus = new EventSystem();
 
+        // мир
         this.generateWorld();
 
-                    // =========================
-// СОХРАНЕНИЕ (S / L)
-// =========================
+        // сохранение
+        this.input.keyboard.on("keydown-S", () => {
+            this.saveSystem.save();
+        });
 
-this.input.keyboard.on("keydown-S", () => {
-    this.saveSystem.save();
-});
+        this.input.keyboard.on("keydown-L", () => {
+            this.saveSystem.load();
+        });
 
-this.input.keyboard.on("keydown-L", () => {
-    this.saveSystem.load();
-});
-
-        // Таймер дней
+        // день
         this.time.addEvent({
             delay: 5000,
             loop: true,
@@ -109,41 +105,24 @@ this.input.keyboard.on("keydown-L", () => {
             }
         });
 
-        // Клик = посадить дерево
+        // клик — дерево
         this.input.on("pointerdown", (pointer) => {
             this.plantTree(pointer.x, pointer.y);
-
-            // =========================
-// СОХРАНЕНИЕ (S / L)
-// =========================
-
-this.input.keyboard.on("keydown-S", () => {
-    this.saveSystem.save();
-});
-
-this.input.keyboard.on("keydown-L", () => {
-    this.saveSystem.load();
         });
     }
 
     update() {
 
         this.updateTrees();
-        
+
         this.hud.update();
-        
         this.scoreSystem.update();
-            
         this.particles.update();
-        
         this.seasons.update();
-        
         this.disasters.update();
-        
         this.weather.update();
 
         this.updateAnimals();
-
         this.updateUI();
 
         this.natureHealth = Phaser.Math.Clamp(this.natureHealth, 0, 100);
@@ -162,7 +141,6 @@ this.input.keyboard.on("keydown-L", () => {
         const width = this.cameras.main.width;
         const height = this.cameras.main.height;
 
-        // деревья
         for (let i = 0; i < 30; i++) {
             this.plantTree(
                 Phaser.Math.Between(0, width),
@@ -170,7 +148,6 @@ this.input.keyboard.on("keydown-L", () => {
             );
         }
 
-        // животные
         for (let i = 0; i < 8; i++) {
             this.spawnAnimal();
         }
@@ -207,10 +184,6 @@ this.input.keyboard.on("keydown-L", () => {
         this.animals.push(animal);
     }
 
-    // =========================
-    // ЛОГИКА
-    // =========================
-
     updateAnimals() {
 
         for (const a of this.animals) {
@@ -223,20 +196,33 @@ this.input.keyboard.on("keydown-L", () => {
         }
     }
 
+    updateTrees() {
+
+        for (let i = this.trees.length - 1; i >= 0; i--) {
+
+            const tree = this.trees[i];
+
+            if (tree.health > 60) {
+                tree.scaleX = Math.min(tree.scaleX + 0.0005, 1.5);
+                tree.scaleY = tree.scaleX;
+            }
+
+            if (tree.health <= 0) {
+                tree.destroy();
+                this.trees.splice(i, 1);
+            }
+        }
+    }
+
     randomEvent() {
 
         const r = Math.random();
 
         if (r < 0.33) {
-            // засуха
             this.natureHealth -= 10;
-        }
-        else if (r < 0.66) {
-            // дождь
+        } else if (r < 0.66) {
             this.natureHealth += 5;
-        }
-        else {
-            // пожар
+        } else {
             this.destroyRandomTrees();
             this.natureHealth -= 15;
         }
@@ -247,16 +233,11 @@ this.input.keyboard.on("keydown-L", () => {
         for (let i = this.trees.length - 1; i >= 0; i--) {
 
             if (Math.random() < 0.3) {
-
                 this.trees[i].destroy();
                 this.trees.splice(i, 1);
             }
         }
     }
-
-    // =========================
-    // UI
-    // =========================
 
     updateUI() {
 
@@ -267,13 +248,5 @@ this.input.keyboard.on("keydown-L", () => {
         this.dayText.setText(
             "📅 День: " + this.day
         );
-    }              
-    20,
-    this.cameras.main.height - 30,
-    "ЛКМ — посадить дерево | S — сохранить | L — загрузить",
-    {
-        fontSize: "14px",
-        color: "#ffffff"
-       }
-   );
+    }
 }
