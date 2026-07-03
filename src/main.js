@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
 // Сцены (мы их создадим дальше)
-import BootScene from "./scenes/BootScene.js";
+import BootScene from "./scenes/BootScene";       
 import PreloadScene from "./scenes/PreloadScene.js";
 import MenuScene from "./scenes/MenuScene.js";
 import GameScene from "./scenes/GameScene.js";
