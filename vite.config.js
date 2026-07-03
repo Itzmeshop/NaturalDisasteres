@@ -1,35 +1,23 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: "/NaturalDisasters/", // имя твоего репозитория
 
-    server: {
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    open: true
+  },
 
-        host: "0.0.0.0",
+  preview: {
+    host: "0.0.0.0",
+    port: 4173
+  },
 
-        port: 5173,
-
-        open: true
-
-    },
-
-    preview: {
-
-        host: "0.0.0.0",
-
-        port: 4173
-
-    },
-
-    build: {
-
-        outDir: "dist",
-
-        assetsDir: "assets",
-
-        sourcemap: false,
-
-        emptyOutDir: true
-
-    }
-
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+    sourcemap: false,
+    emptyOutDir: true
+  }
 });
